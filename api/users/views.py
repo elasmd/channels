@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.utils import timezone
 
 from django.views.decorators.csrf import csrf_exempt
@@ -12,7 +13,7 @@ from api.channel.models import Channel
 from api.package.helpers import packageinfo
 from api.package.models import Package
 from api.users.models import Subscriptions
-from api.users.serializers import SubscriptionAdd, SubscriptionId
+from api.users.serializers import SubscriptionAdd, SubscriptionId, PaginationSerializer
 
 
 class UserSub(APIView):
@@ -49,7 +50,9 @@ class UserSub(APIView):
 class AllChannels(APIView):
 
     @staticmethod
+    @serialize_decorator(PaginationSerializer)
     def get(request):
+        valid = request.valid
         obj = Channel.objects.all()
         response = []
         for items in obj:
@@ -58,7 +61,12 @@ class AllChannels(APIView):
                 'date_created': items.date_created,
                 'packages': [packageinfo(item) for item in Package.objects.filter(channel=items)]
             })
-        return Response(response)
+        page = Paginator(response,valid['per_page'])
+        return Response({
+            "data":page.page(valid['page']).object_list,
+            "pages":page.num_pages,
+            "total":page.count
+        })
 
 @csrf_exempt
 @require_POST
