@@ -7,7 +7,7 @@ elasticsearch==7.0.2
 pip==19.0.3
 python-dateutil==2.8.0
 pytz==2019.1
-setuptools==40.8.0
+setuptools==65.5.1
 six==1.12.0
 sqlparse==0.3.0
 urllib3==1.25.3
